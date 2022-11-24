@@ -12,8 +12,8 @@ Base = declarative_base()
 
 # Our models. Remove the demo "Note" and add your own
 
-class Note(Base):
-    __tablename__="notes"
+class Recipe(Base):
+    __tablename__="recipe"
     id = Column(Integer, primary_key=True)
     title = Column(String(30))
     content = Column(Text)

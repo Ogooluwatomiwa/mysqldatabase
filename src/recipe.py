@@ -3,40 +3,65 @@ import db
 import models
 
 # Make these settings match your Makefile
-user="recipedb"
+user="notes"
 password="swordfish"
-dbname="recipedb"
-port="3333"
+dbname="notes"
+port="3334"
+
+
+def menu():
+    print("Welcome to the note tool")
+    print("------------------------")
+    print()
+    print("1: Initialise Database")
+    print("2: List notes")
+    print("3: Add note")
+    print("4: Read note")
+    print("5: Delete note")
+    print("0: Quit")
+    print()
+    return int(input("Choose option: "))
 
 if __name__=="__main__":
 
-    # This is all just demo code you can base your own demo code off it
-    # It also demonstrates how to initialise the DB, add items, query, etc
-    
-    create_yn=input("Create DB? Enter Y to create, anything else to skip: ")
-    if create_yn=="Y":
-        db.create_db(user,password,port,dbname)
-
-    # A session object is our DB connection
     session=db.connect(user,password,port,dbname)
+    
+    userInput=None
 
-    #Create a new note
-    title=input("Enter new recipe title: ")
-    content=input("Enter new recipe content: ")
-    newRecipe = models.Recipe(title=title,content=content)
+    while userInput!=0:
+        userInput=menu()
+        print()
+        if userInput==1:            
+            db.create_db(user,password,port,dbname)
 
-    #Add it to the DB
-    session.add(newRecipe)    
-    session.commit()
+        elif userInput==2:            
+            notes=session.query(models.Note).all()
+            for note in notes:
+                print(f"{note.id}: {note.title}")
+                
+        elif userInput==3:
+            title=input("Enter new note title: ")
+            content=input("Enter new note content: ")
+            newNote = models.Note(title=title,content=content)
+            session.add(newNote)    
+            session.commit()
 
+        elif userInput==4:
+            noteNum=int(input("Enter note number: "))
+            note = session.query(models.Note).filter_by(id=noteNum).first()
+            if note==None:
+                print("There is no note with that number")
+            else:
+                print(note.title)
+                print("-"*len(note.title))
+                print(note.content)
 
-    recipe=session.query(models.Recipe).all()
-
-    print()
-    for recip in recipe:
-
-        title=f"{recip.title} ({recip.id})"
-        print(title)
-        print("-"*len(title))
-        print(recip.content)
+        elif userInput==5:
+            noteNum=int(input("Enter note number: "))
+            note = session.query(models.Note).filter_by(id=noteNum)
+            if note==None:
+                print("There is no note with that number")
+            else:
+                note.delete()
+                session.commit()
         print()
